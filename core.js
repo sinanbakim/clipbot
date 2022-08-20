@@ -62,4 +62,11 @@ module.exports = class Core {
             console.log(response);
          });
    }
+   fetchAllUsersInStream = function() {
+      this.api
+         .get('clips', { search: { broadcaster_id: this.env.TWITCH_BROADCAST_ID } })
+         .then(response => {
+            console.log(response);
+         });
+   }
 };

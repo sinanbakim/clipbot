@@ -1,9 +1,9 @@
 
 require('dotenv').config();
-const dcChID = process.env.DISCORD_CA_ALLGEMEIN_CHANNEL_ID;
+const dcChID = process.env.DISCORD_CHANNEL_ID;
 
-const http = require('http');
-const { TwitchJs, Api } = require("twitch-js");
+//const http = require('http');
+const { Api, Chat } = require("twitch-js");
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const core = require('./core.js');
 
@@ -25,31 +25,55 @@ O = new core(api, client, process.env);
 
 client.once('ready', () => {
 	console.log('Ready!');
-  const channel = client.channels.cache.get(dcChID);
+  //const guild = client.guilds.cache.get();
+  const channel = client.channels.cache.find(channel => channel.name === "bot");
+  //console.log(channel);
+  
 
+  
 });
 
 client.on('interactionCreate', async interaction => {
-  console.log(interaction);
+	if (!interaction.isChatInputCommand()) return;
+
+	const { commandName } = interaction;
+
+	if (commandName === 'ping') {
+		await interaction.reply('Pong!');
+	} else if (commandName === 'server') {
+		await interaction.reply('Server info.');
+	} else if (commandName === 'user') {
+		await interaction.reply('User info.');
+	}
 });
 
+client.on('interactionCreate', async interaction => {
+	if (!interaction.isChatInputCommand()) return;
 
-//client.login(process.env.DISCORD_BOT_TOKEN);
+	const { commandName } = interaction;
 
+	if (commandName === 'react') {
+		const message = await interaction.reply({ content: 'You can react with Unicode emojis!', fetchReply: true });
+		message.react('😄');
+	}
+});
+
+client.login(process.env.DISCORD_BOT_TOKEN);
+
+/*
 O.fetchAllClips()
   .then(
     (clips) => {
       console.log(clips.length);
     }
   );
+*/
 
 
 
-
-
-//const username = process.env.USERNAME;
-//const token = process.env.TOKEN;
-//const channel = "inuzaa";
+const twitchUsername = process.env.USERNAME;
+const twitchToken = process.env.TWITCH_CHAT_TOKEN;
+const channel = process.env.TWITCH_CHANNEL_NAME;
 
 //({ token: twToken, clientId: twClientID });
 
@@ -59,20 +83,19 @@ O.fetchAllClips()
 // Provide your username and token secret keys from Server Control Panel (left).
 // To generate tokens, use https://twitchtokengenerator.com.
 
-/*
+
 const run = async () => {
   const chat = new Chat({
-    username,
-    token
+    twitchUsername,
+    twitchToken
   });
 
-  await chat.connect();
-  await chat.join(channel);
+  chat.connect();
+  chat.join(channel);
 
-  chat.on(ChatEvents.SUBSCRIPTION, (message) => {
-    // Do stuff ...
+  chat.on('*', (message) => {
+    console.log(message);
   });
 };
 
 run();
-*/
