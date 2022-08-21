@@ -1,13 +1,42 @@
 
 require('dotenv').config();
 const dcChID = process.env.DISCORD_CHANNEL_ID;
-
+const twitchUsername = process.env.USERNAME;
+const twitchToken = process.env.TWITCH_ACCESS_TOKEN;
+const twitchChannel = process.env.TWITCH_CHANNEL_NAME;
 //const http = require('http');
-const { Api, Chat } = require("twitch-js");
-const { Client, GatewayIntentBits, Partials } = require('discord.js');
-const core = require('./core.js');
 
-const api = new Api({token: process.env.TWITCH_ACCESS_TOKEN, clientId: process.env.TWITCH_CLIENT_ID});
+const twitchOptions = {
+  clientId: process.env.TWITCH_CLIENT_ID,
+  token: process.env.TWITCH_ACCESS_TOKEN,
+  username: process.env.USERNAME,
+  log: { enabled: false },
+};
+
+const { TwitchJs } = import("twitch-js");
+const { Api } = new TwitchJs({options: twitchOptions});
+
+
+
+
+const initTwitchChatRoutine = async () => {
+  const { Chat } = new TwitchJs(twitchOptions);
+  await Chat.connect();
+  await Chat.join(channel);
+
+  await Chat.on('*', (message) => {
+    console.log(message);
+  });
+};
+const initTwitchApiRoutine = async () => {
+  await twitchApi.get('streams');
+};
+
+const { Client, GatewayIntentBits, Partials } = require('discord.js');
+const { Core } = require('./core.js');
+
+initTwitchChatRoutine();
+initTwitchApiRoutine();
 
 const client = new Client({ 
   intents: [
@@ -21,7 +50,7 @@ const client = new Client({
   ]
 });
 
-O = new core(api, client, process.env);
+O = new Core(twitchApi, client, process.env);
 
 client.once('ready', () => {
 	console.log('Ready!');
@@ -71,9 +100,7 @@ O.fetchAllClips()
 
 
 
-const twitchUsername = process.env.USERNAME;
-const twitchToken = process.env.TWITCH_CHAT_TOKEN;
-const channel = process.env.TWITCH_CHANNEL_NAME;
+
 
 //({ token: twToken, clientId: twClientID });
 
@@ -84,18 +111,4 @@ const channel = process.env.TWITCH_CHANNEL_NAME;
 // To generate tokens, use https://twitchtokengenerator.com.
 
 
-const run = async () => {
-  const chat = new Chat({
-    twitchUsername,
-    twitchToken
-  });
 
-  chat.connect();
-  chat.join(channel);
-
-  chat.on('*', (message) => {
-    console.log(message);
-  });
-};
-
-run();
