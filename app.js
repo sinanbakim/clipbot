@@ -1,37 +1,60 @@
 require('dotenv').config();
+const fetchUtil = require('twitch-js/lib/utils/fetch');
 const dcChID = process.env.DISCORD_CHANNEL_ID;
 const twitchUsername = process.env.USERNAME;
 const twitchToken = process.env.TWITCH_ACCESS_TOKEN;
-const twitchChannel = process.env.TWITCH_CHANNEL_NAME;
+
 //const http = require('http');
+
+const onAuthenticationFailure = () =>
+  fetchUtil('https://id.twitch.tv/oauth2/token', {
+    method: 'post',
+    search: {
+      grant_type: 'refresh_token',
+      refresh_token: process.env.TWITCH_REFRESH_TOKEN,
+      client_id: process.env.TWITCH_CLIENT_ID,
+      client_secret: process.env.TWITCH_CLIENT_SECRET,
+    },
+  }).then((response) => {
+    accessToken = response.accessToken;
+  });
 
 var twitchOptions = {
     clientId: process.env.TWITCH_CLIENT_ID,
     token: process.env.TWITCH_ACCESS_TOKEN,
-    username: process.env.USERNAME,
-    log: { enabled: false },
+    username: process.env.TWITCH_USERNAME,
+    log: { enabled: true },
+    onAuthenticationFailure
 };
 
 const { Chat, Api } = require("twitch-js");
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const Core = require('./core.js');
-console.log(Core);
 
+var twitchChannel = process.env.TWITCH_CHANNEL_NAME;
+var accessToken;
 var twitchChat;
 var twitchApi;
 var O;
 
+https://twitchtokengenerator.com/api/refresh/<REFRESH_TOKEN>
 
-const initTwitchChatRoutine = async(TwitchJs) => {
+
+
+initTwitchChatRoutine = async() => {
     twitchChat = new Chat(twitchOptions);
     await twitchChat.connect();
-    await twitchChat.join(channel);
+    await twitchChat.join(twitchChannel);
 
-    await twitchChat.on('*', (message) => {
-        console.log(message);
+    twitchChat.on('*', (messages) => {
+        if (messages.message === "hi") {
+            twitchChat.say(twitchChannel, "hi back");
+        }
+        console.log(messages);
     });
 };
-const initTwitchApiRoutine = async() => {
+
+initTwitchApiRoutine = async() => {
     twitchApi = new Api(twitchOptions);
     await twitchApi.get('streams');
 };
