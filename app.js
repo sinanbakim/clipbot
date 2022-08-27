@@ -23,23 +23,44 @@ var twitchOptions = {
     clientId: process.env.TWITCH_CLIENT_ID,
     token: process.env.TWITCH_ACCESS_TOKEN,
     username: process.env.TWITCH_USERNAME,
-    log: { enabled: true },
+    log: { enabled: false },
     onAuthenticationFailure
 };
 
 const { Chat, Api } = require("twitch-js");
-const { Client, GatewayIntentBits, Partials } = require('discord.js');
+const { Client, EmbedBuilder, GatewayIntentBits, Partials } = require('discord.js');
 const Core = require('./core.js');
 
 var twitchChannel = process.env.TWITCH_CHANNEL_NAME;
 var accessToken;
 var twitchChat;
 var twitchApi;
-var O;
-
-https://twitchtokengenerator.com/api/refresh/<REFRESH_TOKEN>
+var discordChannel;
 
 
+//https://twitchtokengenerator.com/api/refresh/<REFRESH_TOKEN>
+
+
+
+buildClipEntry = () => {
+    return new EmbedBuilder()
+	.setColor(0x0099FF)
+	.setTitle('Some title')
+	.setURL('https://discord.js.org/')
+	.setAuthor({ name: 'Some name', iconURL: 'https://i.imgur.com/AfFp7pu.png', url: 'https://discord.js.org' })
+	.setDescription('Some description here')
+	.setThumbnail('https://i.imgur.com/AfFp7pu.png')
+	.addFields(
+		{ name: 'Regular field title', value: 'Some value here' },
+		{ name: '\u200B', value: '\u200B' },
+		{ name: 'Inline field title', value: 'Some value here', inline: true },
+		{ name: 'Inline field title', value: 'Some value here', inline: true },
+	)
+	.addFields({ name: 'Inline field title', value: 'Some value here', inline: true })
+	.setImage('https://i.imgur.com/AfFp7pu.png')
+	.setTimestamp()
+	.setFooter({ text: 'Some footer text here', iconURL: 'https://i.imgur.com/AfFp7pu.png' });
+};
 
 initTwitchChatRoutine = async() => {
     twitchChat = new Chat(twitchOptions);
@@ -61,7 +82,7 @@ initTwitchApiRoutine = async() => {
 
 
 
-initTwitchChatRoutine();
+//initTwitchChatRoutine();
 initTwitchApiRoutine();
 
 const client = new Client({
@@ -76,20 +97,23 @@ const client = new Client({
     ]
 });
 
-const initCore = async() => {
-    O = new Core(twitchApi, client, process.env);
+    
+
+const getDiscordChannelByName = async(channelName) => {
+    return Promise.resolve(client.channels.cache.find(channel => channel.name === channelName));
 };
 
-initCore();
 
 
-client.once('ready', () => {
+
+
+client.once('ready', async() => {
     console.log('Ready!');
     //const guild = client.guilds.cache.get();
-    const channel = client.channels.cache.find(channel => channel.name === "bot");
+    let discordChannel = await getDiscordChannelByName("bot")
+    discordChannel.send({ embeds: [buildClipEntry()] });
     //console.log(channel);
-
-
+    
 
 });
 
@@ -120,23 +144,17 @@ client.on('interactionCreate', async interaction => {
 
 client.login(process.env.DISCORD_BOT_TOKEN);
 
-/*
+const O = new Core(twitchApi, client, process.env);
+O.initCore();
+
 O.fetchAllClips()
   .then(
     (clips) => {
       console.log(clips.length);
     }
   );
-*/
 
 
 
 
 
-//({ token: twToken, clientId: twClientID });
-
-
-
-
-// Provide your username and token secret keys from Server Control Panel (left).
-// To generate tokens, use https://twitchtokengenerator.com.
